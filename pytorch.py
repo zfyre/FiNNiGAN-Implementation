@@ -5,7 +5,7 @@ import numpy as np
 # alwys create a floating point tensor
 #print(t1.shape)
 # tensor shoyld have a proper shape
-
+#...
 #create tensors:
 
 #x = torch.tensor(3.)# we are not intrested in any future outputs wrt x
