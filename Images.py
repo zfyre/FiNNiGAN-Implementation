@@ -12,7 +12,7 @@ dataset = torch_dataset.MNIST(root='data/')# Downloads here only!!
 # 60,000 data samples:
 # print(len(dataset))
 
-test_dataset = torch_dataset.MNIST(root='data/',train=False)
+test_dataset = torch_dataset.MNIST(root='data/',train=False,transform=transforms.ToTensor())
 # 10,000 test samples:
 # print(len(test_dataset))
 
@@ -195,9 +195,51 @@ history3 = train(15,0.01,model,train_loader,val_loader)
 
 
 
+## A few things To observe at end::
+history = [result0] + history1+history2+history3
+accuracies = [result['val_acc'] for result in history]
+plt.plot(accuracies,'-x')
+plt.xlabel('epoch')
+plt.ylabel('accuracy')
+plt.title('Accuracy vs No. of epochs')
+plt.show()
 
+img,label = test_dataset[0]
+plt.imshow(img[0],cmap='gray')
 
+def predict_image(img,model):
+    xb = img.unsqueeze(0)
+    yb = model(xb)
+    _,pred = torch.max(yb,dim=1)
+    return pred[0].item()
 
+img, label = test_dataset[0]
+plt.imshow(img[0],cmap='gray')
+plt.show()
+print('Label:',label,'Predicted',predict_image(img,model))
+
+img, label = test_dataset[100]
+plt.imshow(img[0],cmap='gray')
+plt.show()
+print('Label:',label,'Predicted',predict_image(img,model))
+
+img, label = test_dataset[984]
+plt.imshow(img[0],cmap='gray')
+plt.show()
+print('Label:',label,'Predicted',predict_image(img,model))
+
+test_loader = DataLoader(test_dataset,batch_size=256)
+result = evaluate(model,test_loader)
+print(result)
+
+### Saving The Model:
+
+torch.save(model.state_dict(),'mnist-logistic.pth')
+print(model.state_dict())
+
+## To load:
+model2 = ImgModel()
+model2.load_state_dict(torch.load('mnist-logistic.pth')) 
 
 
 
