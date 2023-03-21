@@ -10,13 +10,13 @@ from torchsummary import summary
 
 # Double conv is Clear!!
 class DoubleConv(nn.Module):
-    def __init__(self,in_channels, out_channels,K=3):
+    def __init__(self,in_channels, out_channels,KernelSize=3,Stride = 1):
         super(DoubleConv,self).__init__()
         self.conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels,kernel_size=K,stride=1,padding=1,bias=False),
+            nn.Conv2d(in_channels, out_channels,kernel_size=KernelSize,stride=Stride,padding=1,bias=False),
             nn.BatchNorm2d(out_channels),
             nn.LeakyReLU(0.2),
-            nn.Conv2d(out_channels, out_channels,kernel_size=K,stride=1,padding=1,bias=False),
+            nn.Conv2d(out_channels, out_channels,kernel_size=KernelSize,stride=Stride,padding=1,bias=False),
             nn.BatchNorm2d(out_channels),
             nn.LeakyReLU(0.2),
         )
@@ -32,7 +32,7 @@ class Down(nn.Module):
         super(Down,self).__init__()
         self.maxpool_conv = nn.Sequential(
             nn.MaxPool2d(kernel_size=2,stride=2),
-            DoubleConv(in_channels, out_channels)
+            DoubleConv(in_channels, out_channels,3)
         )
 
     def forward(self, x):
@@ -47,15 +47,15 @@ class Up(nn.Module):
         self.conv = DoubleConv(2*out_channels,out_channels);
 
     def forward(self, DownImg, BackImg):
-        print('in_img: ',DownImg.shape)
-        print('back_img: ',BackImg.shape)
+        # print('in_img: ',DownImg.shape)
+        # print('back_img: ',BackImg.shape)
         TransposeImg = self.up(DownImg)
-        print('Transposed: ',TransposeImg.shape)
+        # print('Transposed: ',TransposeImg.shape)
         if BackImg.shape != TransposeImg.shape:
             TransposeImg = TF.resize(TransposeImg,size=BackImg.shape[2:])
         
         ConcatImg = torch.cat((TransposeImg,BackImg),dim=1)
-        print('Concatenated: ',ConcatImg.shape)
+        # print('Concatenated: ',ConcatImg.shape)
         x = self.conv(ConcatImg)
         return x
     
@@ -118,6 +118,22 @@ class UNET(nn.Module):
         # print('out: ',x.shape)
         return x
 
+
+class Discriminator(nn.Module):
+    def __init__(self,in_channels,out_channels):
+        super(Discriminator,self).__init__()
+        self.dis = nn.Sequential(
+            nn.Conv2d(in_channels,8,kernel_size=4,stride=2),
+            nn.Conv2d(8,16,kernel_size=4,stride=2),
+            nn.Conv2d(16,32,kernel_size=4,stride=2),
+            nn.Conv2d(32,64,kernel_size=4,stride=2),
+            nn.Conv2d(64,1,kernel_size=4,stride=2),
+        )
+    
+    def forward(self,x):
+        return self.dis(x)
+
+
 # def test():
 #     x  = torch.randn((3,3,165,165))## batchsize,in_channels,H, W
 #     model = UNET(in_channels=3,out_channels=3)
@@ -128,3 +144,8 @@ class UNET(nn.Module):
 
 # if __name__ == "__main__":
 #     test()
+
+# testUNET = UNET(6,3)
+# summary(testUNET,input_size=(6,160,160))
+# testDIS = Discriminator(6,3)
+# summary(testDIS,input_size=(6,160,160))
