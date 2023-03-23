@@ -1,55 +1,73 @@
-import cv2
 import os
-from matplotlib import pyplot as plt
+import cv2
 
-# Setup the Capture:
-# cap = cv2.VideoCapture(os.path.join('data','Videos','vid0.y4m'))
 
-# Grab a frame:
-# success , frame = cap.read()
+VidDirectory = os.path.join('---','--')
+Abs_DatasetPath = "---" # Will be the absolute path!!
+Rel_DatasetPath = os.path.join('---','---') # Will be a relative path
 
-# Rendering the Frame:
-# print(frame.shape)
-# plt.imshow(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB))
-# plt.show()
+directory = os.fsencode(VidDirectory)
 
-# Release the capture:
-# cap.release()
-# print(cap.read())
 
-# Capture Properties
+def saveFrame(success,img,dirname,name):
+    if success:
+        result=cv2.imwrite(Abs_DatasetPath+dirname+'/'+name,img)
+        print(Abs_DatasetPath+dirname+'/'+name)
+    if result==True:
+        print('File saved successfully')
+    else:
+        print('Error in saving file')
 
-# print(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-# print(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-# print(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-# print(cap.get(cv2.CAP_PROP_FPS))
- 
 
-# Working with Video Captures:
+cnt = 0
+def VidCap(VidPath,count):
+    cap = cv2.VideoCapture(VidPath)
 
-cap = cv2.VideoCapture(os.path.join('data','Videos','vid0.y4m'))
+    for frame_idx in range((int(cap.get(cv2.CAP_PROP_FRAME_COUNT))//3)*3):
+        # Read Frame:
+        success,frame = cap.read()
+        global cnt 
+        if((frame_idx%3)==0):
+            cnt += 1
+            dir_path = os.path.join(Rel_DatasetPath,'data'+str(cnt))
+            
+            # if os.path.exists(dir_path): # Set-ExecutionPolicy Unrestricted
+            #     os.remove(dir_path) 
+            """Above Removal Not working, reason is not clear"""
+            
+            # Create a directory as data_i: 
+            os.mkdir(dir_path) 
+            # Add current frame also to the directory
+            saveFrame(success,frame,'data'+str(cnt),'frame1.png')
 
-# Setup Video Writer:
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-fps = cap.get(cv2.CAP_PROP_FPS)
+        elif((frame_idx%3)==1):
+            # Add current Frame to the directory
+            saveFrame(success,frame,'data'+str(cnt),'frame2.png')
 
-videowriter = cv2.VideoWriter(os.path.join('data','output','output.avi'),cv2.VideoWriter_fourcc('P','I','M','1'),fps,(width,height),isColor = False)
+        else:
+            # Add current Frame to the directory
+            saveFrame(success,frame,'data'+str(cnt),'frame3.png')
 
-for frame_idx in range(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))):
-    # Read Frame:
-    success,frame = cap.read()
-    # Transform:
-    gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
-    # show Image
-    cv2.imshow('Video Player',gray)
-    # Write out our frame:
-    videowriter.write(gray)
-    # Render:
-    if cv2.waitKey(10) & 0xFF == ord('q'):
-        break
-# Close down Everything:
-cap.release()
-cv2.destroyAllWindows()
-# Relase our video Writer:
-videowriter.release()
+        # Rendering The Processing Video
+        cv2.imshow('Video Player',frame)
+        if cv2.waitKey(10) & 0xFF == ord('q'):
+            break
+
+    # Close down Everything and release Video Writer:
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+
+# Iterating The Videos containing Directory
+outcount = 0
+for file in os.listdir(directory):
+    filename = os.fsdecode(file)
+    file_path = os.path.join(VidDirectory,filename)
+    VidCap(file_path,outcount)
+    print(filename)
+    outcount+=1
+
+
+
+
