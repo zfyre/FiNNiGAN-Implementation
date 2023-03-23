@@ -2,9 +2,11 @@ import os
 import cv2
 
 
-VidDirectory = os.path.join('---','--')
-Abs_DatasetPath = "---" # Will be the absolute path!!
-Rel_DatasetPath = os.path.join('---','---') # Will be a relative path
+VidDirectory = os.path.join('---','--') # --> os.path.join('data','Videos')
+# Will be the absolute path:
+Abs_DatasetPath = "---" # --> "C:/.../FiniGAN/data/output/"
+#Will be a relative path:
+Rel_DatasetPath = os.path.join('---','---') # --> os.path.join('data','output')
 
 directory = os.fsencode(VidDirectory)
 
