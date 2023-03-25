@@ -6,6 +6,10 @@ import torchvision.transforms as transforms
 from skimage import io
 import cv2
 
+def stack (img1,img2):
+    my_list = [img1,img2]
+    return torch.mean(torch.stack(my_list),dim=0) # I took the mean instead of adding (as adarsh said)
+
 class FinniGANDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
@@ -31,9 +35,9 @@ class FinniGANDataset(Dataset):
             orig_img = self.transform(orig_img)
         
         # print(img1.shape, img2.shape)
-        img_cat = torch.cat((img1,img2),dim=0)
+        img_stk = stack(img1, img2)
 
-        return (img_cat,orig_img,I1,I2,O)
+        return (img_stk, orig_img, img1, img2)
         
 
 # The transform Can be transforms.ToTensor()

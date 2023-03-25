@@ -120,18 +120,52 @@ class UNET(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self,in_channels,out_channels):
+    def __init__(self,in_channels,out_channels=None):
         super(Discriminator,self).__init__()
         self.dis = nn.Sequential(
-            nn.Conv2d(in_channels,8,kernel_size=4,stride=2),
-            nn.Conv2d(8,16,kernel_size=4,stride=2),
-            nn.Conv2d(16,32,kernel_size=4,stride=2),
-            nn.Conv2d(32,64,kernel_size=4,stride=2),
-            nn.Conv2d(64,1,kernel_size=4,stride=2),
+            nn.Conv2d(in_channels,8,kernel_size=4,stride=2,padding=1),
+            nn.BatchNorm2d(8),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(8,16,kernel_size=4,stride=2,padding=1),
+            nn.BatchNorm2d(16),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(16,32,kernel_size=4,stride=2,padding=1),
+            nn.BatchNorm2d(32),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(32,64,kernel_size=4,stride=2,padding=1),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(64,1,kernel_size=4,stride=2,padding=1),
+            nn.BatchNorm2d(1),
+            nn.LeakyReLU(0.2),
+
+            # Did this to get vector of size 1 as output!!
+            nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
+            nn.BatchNorm2d(1),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
+            nn.BatchNorm2d(1),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
+            nn.BatchNorm2d(1),
+            nn.LeakyReLU(0.2),
+
+            nn.Flatten(),
+            nn.Sigmoid(),
         )
     
     def forward(self,x):
         return self.dis(x)
+
+
+def initialize_weights(model):
+    for m in model.modules():
+        if isinstance(m,(nn.Conv2d,nn.ConvTranspose2d,nn.BatchNorm2d)):
+            nn.init.normal_(m.weight.data,0.0,0.02) # play with these parms
 
 
 # def test():
@@ -147,5 +181,5 @@ class Discriminator(nn.Module):
 
 # testUNET = UNET(6,3)
 # summary(testUNET,input_size=(6,160,160))
-# testDIS = Discriminator(6,3)
-# summary(testDIS,input_size=(6,160,160))
+# testDIS = Discriminator(3)
+# summary(testDIS,input_size=(3,256,256))
