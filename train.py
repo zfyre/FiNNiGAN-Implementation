@@ -16,7 +16,7 @@ from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyperparams:
-Lr = 2e-4
+Lr = 2e-3
 Batch_size = 100
 Image_size = 256 # To be taken Care of !!
 Channel_img = 3
@@ -125,7 +125,7 @@ def train_discriminator(f1_f3_images,real_images, opt_d):
 # Training the Generator:
 # def stack(img1,img2,img3):
 
-def ms_ssim(pred,orignal):
+def MS_SSIMfunc(pred,orignal):
     pred = (pred+1)/2
     orignal = (orignal+1)/2
     ms_ssim_loss = 1-ms_ssim( pred, orignal, data_range=1, size_average=True )# See if clipping Helps!!! that is if data_range = 1 helps
@@ -150,14 +150,15 @@ def train_generator(f1_f3_images,real_images,opt_g):
     L1_LOSS = l1_loss(denorm(fake_images),denorm(real_images))
 
     # MS-SSIM Loss:
-    PREDclippedIMG = transforms.Normalize(Stats)(preds)
-    MS_SSIM_LOSS = ms_ssim(real_images,PREDclippedIMG)
+    Normalize = transforms.Normalize([0.5 for _ in range(Channel_img)], [0.5 for _ in range(Channel_img)])
+    PREDclippedIMG = Normalize(fake_images)
+    MS_SSIM_LOSS = MS_SSIMfunc(real_images,PREDclippedIMG)
 
     # Clipping Loss:
-    CLIPPING_LOSS = clipping_loss(PREDclippedIMG,preds)
+    CLIPPING_LOSS = clipping_loss(PREDclippedIMG,fake_images)
 
     # Update generator weights
-    loss = DISC_LOSS.item() + L1_LOSS.item() + MS_SSIM_LOSS.item() + CLIPPING_LOSS.item()
+    loss = DISC_LOSS + L1_LOSS + MS_SSIM_LOSS + CLIPPING_LOSS
     loss.backward()
     opt_g.step()
 
@@ -190,7 +191,7 @@ def train(epochs,lr,start_idx=1):
         fake_scores.append(fake_score)
 
         # Log losses & scores (last batch)
-        print ("Epoch [{}/{}], loss_g: {:.4f}, loss_d: {:.4f}, real_scores: {:.4f}, fake_scores: {:.4f}",epoch+1,epochs,loss_g,loss_d,real_score,fake_score)
+        print ("Epoch [{}/{}], loss_g: {:.4f}, loss_d: {:.4f}, real_scores: {:.4f}, fake_scores: {:.4f}".format(epoch+1,epochs,loss_g,loss_d,real_score,fake_score))
 
     return losses_d, losses_d, real_scores, fake_scores
 
