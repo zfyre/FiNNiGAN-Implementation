@@ -147,7 +147,7 @@ def train_generator(f1_f3_images,real_images,opt_g):
     DISC_LOSS = binary_cross_entropy(preds, targets)
 
     # l1 Loss:
-    L1_LOSS = l1_loss(denorm(preds),denorm(real_images))
+    L1_LOSS = l1_loss(denorm(fake_images),denorm(real_images))
 
     # MS-SSIM Loss:
     PREDclippedIMG = transforms.Normalize(Stats)(preds)
