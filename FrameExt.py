@@ -21,7 +21,7 @@ def saveFrame(success,img,dirname,name):
         print('Error in saving file')
 
 
-cnt = 0
+cnt = -1
 def VidCap(VidPath,count):
     cap = cv2.VideoCapture(VidPath)
 

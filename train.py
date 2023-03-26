@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
-from model2 import Discriminator, UNET, initialize_weights
+from model import Discriminator, UNET, initialize_weights
 from FinniDataset import FinniGANDataset
 from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
 
@@ -39,7 +39,7 @@ CustomTransform = transforms.Compose(
 dataset = FinniGANDataset(root_dir = os.path.join('data', 'output'), transform=CustomTransform)
 datalen = len(dataset)
 
-train_set, test_set = torch.utils.data.random_split(dataset, [int(0.8*datalen),int(datalen-0.8*datalen)])
+train_set, test_set = torch.utils.data.random_split(dataset, [int(0.8*datalen),datalen-int(0.8*datalen)])
 train_loader = DataLoader(dataset=train_set, batch_size=Batch_size, shuffle=True)
 test_loader = DataLoader(dataset=test_set, batch_size=Batch_size, shuffle=True)
 
@@ -157,7 +157,7 @@ def train_generator(f1_f3_images,real_images,opt_g):
     CLIPPING_LOSS = clipping_loss(PREDclippedIMG,preds)
 
     # Update generator weights
-    loss = DISC_LOSS + L1_LOSS + MS_SSIM_LOSS + CLIPPING_LOSS
+    loss = DISC_LOSS.item() + L1_LOSS.item() + MS_SSIM_LOSS.item() + CLIPPING_LOSS.item()
     loss.backward()
     opt_g.step()
 
@@ -177,6 +177,7 @@ def train(epochs,lr,start_idx=1):
 
     for epoch in range(epochs):
         for batch_idx,(stkIMG,middleIMG,_,_) in enumerate(train_loader):
+            stkIMG, middleIMG = stkIMG.to(device), middleIMG.to(device)
             # Train Discriminator: 
             loss_d, real_score, fake_score = train_discriminator(stkIMG,middleIMG,opt_disc)
             # Train generator:
