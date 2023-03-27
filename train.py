@@ -46,8 +46,8 @@ test_loader = DataLoader(dataset=test_set, batch_size=Batch_size, shuffle=True)
 # Initializing The Model:
 gen = UNET(in_channels=3,out_channels=3).to(device)
 disc = Discriminator(in_channels=3).to(device)
-# initialize_weights(gen)
-# initialize_weights(disc)
+initialize_weights(gen)
+initialize_weights(disc)
 
 # Using different optimisers for gen and disc:
 opt_gen = optim.Adam(gen.parameters(), lr=Lr, betas=(0.5,0.999)) # Betas Can be changed:
