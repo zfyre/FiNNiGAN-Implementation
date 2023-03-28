@@ -23,7 +23,7 @@ Channel_img = 3
 Num_Epochs = 5
 # Features_Disc = 160
 # Features_Gen = 160
-Stats = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5) 
+Stats = (1, 1, 1), (1, 1, 1) 
 
 # Appling the Transforms:
 CustomTransform = transforms.Compose(
@@ -31,7 +31,7 @@ CustomTransform = transforms.Compose(
         transforms.Resize((Image_size,Image_size)),
         transforms.ToTensor(),
         transforms.Normalize(
-            [0.5 for _ in range(Channel_img)], [0.5 for _ in range(Channel_img)]
+            [1 for _ in range(Channel_img)], [1 for _ in range(Channel_img)]
         )
     ]
 )
@@ -150,7 +150,7 @@ def train_generator(f1_f3_images,real_images,opt_g):
     L1_LOSS = l1_loss(denorm(fake_images),denorm(real_images))
 
     # MS-SSIM Loss:
-    Normalize = transforms.Normalize([0.5 for _ in range(Channel_img)], [0.5 for _ in range(Channel_img)])
+    Normalize = transforms.Normalize([1 for _ in range(Channel_img)], [1 for _ in range(Channel_img)])
     PREDclippedIMG = Normalize(fake_images)
     MS_SSIM_LOSS = MS_SSIMfunc(real_images,PREDclippedIMG)
 

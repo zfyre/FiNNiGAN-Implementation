@@ -8,6 +8,7 @@ import torchvision.transforms.functional as TF
 from torchvision import models
 from torchsummary import summary
 
+
 # Double conv is Clear!!
 class DoubleConv(nn.Module):
     def __init__(self,in_channels, out_channels,KernelSize=3,Stride = 1):
@@ -44,7 +45,8 @@ class Up(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(Up,self).__init__()
         self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
-        self.conv = DoubleConv(2*out_channels,out_channels);
+        self.conv = DoubleConv(2*out_channels,out_channels)
+        self.drop = nn.Dropout2d(0.2)
 
     def forward(self, DownImg, BackImg):
         # print('in_img: ',DownImg.shape)
@@ -57,6 +59,7 @@ class Up(nn.Module):
         ConcatImg = torch.cat((TransposeImg,BackImg),dim=1)
         # print('Concatenated: ',ConcatImg.shape)
         x = self.conv(ConcatImg)
+        x = self.drop(x)
         return x
     
 # Final Convolutional Layer!!
@@ -123,37 +126,49 @@ class Discriminator(nn.Module):
     def __init__(self,in_channels,out_channels=None):
         super(Discriminator,self).__init__()
         self.dis = nn.Sequential(
+            # 256x256
             nn.Conv2d(in_channels,8,kernel_size=4,stride=2,padding=1),
             nn.BatchNorm2d(8),
             nn.LeakyReLU(0.2),
 
+            # 128x128
             nn.Conv2d(8,16,kernel_size=4,stride=2,padding=1),
             nn.BatchNorm2d(16),
             nn.LeakyReLU(0.2),
 
+            # 64x64
             nn.Conv2d(16,32,kernel_size=4,stride=2,padding=1),
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.2),
 
+            # 32x32
             nn.Conv2d(32,64,kernel_size=4,stride=2,padding=1),
             nn.BatchNorm2d(64),
             nn.LeakyReLU(0.2),
 
+            # 16x16
             nn.Conv2d(64,1,kernel_size=4,stride=2,padding=1),
             nn.BatchNorm2d(1),
             nn.LeakyReLU(0.2),
 
             # Did this to get vector of size 1 as output!!
-            nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
-            nn.BatchNorm2d(1),
-            nn.LeakyReLU(0.2),
-            nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
-            nn.BatchNorm2d(1),
-            nn.LeakyReLU(0.2),
-            nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
-            nn.BatchNorm2d(1),
-            nn.LeakyReLU(0.2),
+            # # 8x8
+            nn.MaxPool2d(kernel_size=2,stride=2),
+            nn.MaxPool2d(kernel_size=2,stride=2),
+            nn.MaxPool2d(kernel_size=2,stride=2),
+            # nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
+            # nn.BatchNorm2d(1),
+            # nn.LeakyReLU(0.2),
+            # # 4x4
+            # nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
+            # nn.BatchNorm2d(1),
+            # nn.LeakyReLU(0.2),
+            # # 2x2
+            # nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
+            # nn.BatchNorm2d(1),
+            # nn.LeakyReLU(0.2),
 
+            # 1x1
             nn.Flatten(),
             nn.Sigmoid(),
         )
@@ -179,7 +194,7 @@ def initialize_weights(model):
 # if __name__ == "__main__":
 #     test()
 
-# testUNET = UNET(6,3)
-# summary(testUNET,input_size=(6,160,160))
+# testUNET = UNET(3,3)
+# summary(testUNET,input_size=(3,256,256))
 # testDIS = Discriminator(3)
 # summary(testDIS,input_size=(3,256,256))
