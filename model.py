@@ -156,17 +156,6 @@ class Discriminator(nn.Module):
             nn.MaxPool2d(kernel_size=2,stride=2),
             nn.MaxPool2d(kernel_size=2,stride=2),
             nn.MaxPool2d(kernel_size=2,stride=2),
-            # nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
-            # nn.BatchNorm2d(1),
-            # nn.LeakyReLU(0.2),
-            # # 4x4
-            # nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
-            # nn.BatchNorm2d(1),
-            # nn.LeakyReLU(0.2),
-            # # 2x2
-            # nn.Conv2d(1,1,kernel_size=4,stride=2,padding=1),
-            # nn.BatchNorm2d(1),
-            # nn.LeakyReLU(0.2),
 
             # 1x1
             nn.Flatten(),
