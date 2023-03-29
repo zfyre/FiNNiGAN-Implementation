@@ -7,8 +7,7 @@ from skimage import io
 import cv2
 
 def stack (img1,img2):
-    my_list = [img1,img2]
-    return torch.mean(torch.stack(my_list),dim=0) # I took the mean instead of adding (as adarsh said)
+    return torch.div(torch.add(img1,img2),2)
 
 class FinniGANDataset(Dataset):
     def __init__(self, root_dir, transform=None):
@@ -23,12 +22,9 @@ class FinniGANDataset(Dataset):
         img1_path = os.path.join(self.root_dir,'data'+str(index),'frame1.png') # The directory name of each sample would be data0, data1, etc..
         img2_path = os.path.join(self.root_dir,'data'+str(index),'frame3.png')
         orig_img_path = os.path.join(self.root_dir,'data'+str(index),'frame2.png')
-        I1 = img1 = Image.open(img1_path)
-        I2 = img2 = Image.open(img2_path)
-        O = orig_img = Image.open(orig_img_path)
-        I1 = transforms.ToTensor()(I1)
-        I2 = transforms.ToTensor()(I2)
-        O = transforms.ToTensor()(O)
+        img1 = Image.open(img1_path)
+        img2 = Image.open(img2_path)
+        orig_img = Image.open(orig_img_path)
         if self.transform:
             img1 = self.transform(img1)
             img2 = self.transform(img2)

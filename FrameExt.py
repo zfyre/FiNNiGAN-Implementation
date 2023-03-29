@@ -4,7 +4,8 @@ import cv2
 
 VidDirectory = os.path.join('data','Videos') # --> os.path.join('data','Videos')
 # Will be the absolute path:
-Abs_DatasetPath = "---" # --> "C:/.../FiniGAN/data/output/"
+"""Change This Absolute Path!!"""
+Abs_DatasetPath = "---" # --> "C:/.../FiniGAN/data/output/" 
 #Will be a relative path:
 Rel_DatasetPath = os.path.join('data','output') # --> os.path.join('data','output')
 

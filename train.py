@@ -17,13 +17,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyperparams:
 Lr = 2e-3
-Batch_size = 100
+Batch_size = 32
 Image_size = 256 # To be taken Care of !!
 Channel_img = 3
-Num_Epochs = 5
-# Features_Disc = 160
-# Features_Gen = 160
-Stats = (1, 1, 1), (1, 1, 1) 
+Num_Epochs = 64
+Stats = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5) 
 
 # Appling the Transforms:
 CustomTransform = transforms.Compose(
@@ -67,56 +65,44 @@ disc.train()
 def denorm(img_tensor):
     return img_tensor*Stats[1][0] + Stats[0][0]
 
-# def showImg(idx):
-#     t1,t2,Img1,Img2 = train_set[idx]
-#     # print(torch.min(t1))
-#     T1 = torch.unsqueeze(t1,dim=0)
-#     print(t1.shape,t2.shape)
-#     genout = gen(T1)
-#     genout = torch.squeeze(genout,dim=0)
-#     print(genout.shape,torch.min(genout),torch.max(genout))
-#     genout = genout.permute(1,2,0)
-#     genout = genout.detach().numpy()
-#     f , axarr = plt.subplots(1,4)
-#     axarr[0].imshow(denorm(Img1).permute(1,2,0))
-#     axarr[1].imshow(denorm(t2).permute(1,2,0))
-#     axarr[2].imshow(denorm(genout))
-#     axarr[3].imshow(denorm(Img2).permute(1,2,0))
-#     # axarr[1,0].imshow(t1.permute(1,2,0))
-#     # axarr[1,1].imshow(t2.permute(1,2,0))
-#     f.show()
-#     plt.show(block=True)
+def showImg(idx):
+    t1,t2,Img1,Img2 = train_set[idx].to(device)
+    genout = torch.squeeze(gen(torch.unsqueeze(t1,dim=0)),dim=0).to(device)
+    f , axarr = plt.subplots(1,4)
+    axarr[0].imshow(denorm(Img1).permute(1,2,0))
+    axarr[1].imshow(denorm(t2).permute(1,2,0))
+    axarr[2].imshow(denorm(genout).permute(1,2,0))
+    axarr[3].imshow(denorm(Img2).permute(1,2,0))
+    f.show()
+    plt.show(block=True)
 
-# showImg(0)
-# for i in range(len(dataset)):
-#     showImg(i)
-#     break
-
-# """I'll have to implement a show image function which shows a buch of images of a batch in one place in collab."""
-
+for i in range(int(len(train_set)*0.2)):
+    showImg(i)
+    break
 
 # Training the Discriminator:
 def train_discriminator(f1_f3_images,real_images, opt_d):
-    # Clear Discriminator gradients
-    opt_d.zero_grad()
 
     # Pass real images through discriminator
-    real_preds = disc(real_images)
-    real_targets = torch.ones(real_images.size(0), 1, device=device)
-    real_loss = binary_cross_entropy(real_preds,real_targets)
+    real_preds = disc(real_images).reshape(-1)
+    # real_targets = torch.ones(Batch_size, 1, device=device)
+    real_loss = binary_cross_entropy(real_preds, torch.ones_like(real_preds,device=device))
     real_score = torch.mean(real_preds).item()
 
     # Generate fake images
     fake_images = gen(f1_f3_images)
 
     # Pass fake images through dicriminator
-    fake_targets = torch.zeros(fake_images.size(0), 1, device=device)
-    fake_preds = disc(fake_images)
-    fake_loss = binary_cross_entropy(fake_preds,fake_targets)
+    # fake_targets = torch.zeros(Batch_size, 1, device=device)
+    fake_preds = disc(fake_images).reshape(-1)
+    fake_loss = binary_cross_entropy(fake_preds,torch.zeros_like(real_preds,device=device))
     fake_score = torch.mean(fake_preds).item()
 
+    print('RealLoss=',real_loss,'FakeLoss=',fake_loss)
     # Update discriminator weights
     loss = real_loss + fake_loss
+    # Clear Discriminator gradients
+    disc.zero_grad()
     loss.backward()
     opt_d.step()
 
@@ -124,41 +110,49 @@ def train_discriminator(f1_f3_images,real_images, opt_d):
 
 # Training the Generator:
 # def stack(img1,img2,img3):
+def MS_SSIMTransform(Img):
+    # ToGray = transforms.Grayscale()
+    Img = (Img+1)/2
+    # Img = ToGray(Img)
+    return Img
 
-def MS_SSIMfunc(pred,orignal):
-    pred = (pred+1)/2
-    orignal = (orignal+1)/2
+def MSSSIM(pred,orignal):
+    pred = MS_SSIMTransform(pred)
+    orignal = MS_SSIMTransform(orignal)
     ms_ssim_loss = 1-ms_ssim( pred, orignal, data_range=1, size_average=True )# See if clipping Helps!!! that is if data_range = 1 helps
     return ms_ssim_loss
          
 def train_generator(f1_f3_images,real_images,opt_g):
-    # Clear generator gradients
-    opt_g.zero_grad()
 
     # Generate fake images
-    fake_images = gen(f1_f3_images)
+    fake_images = gen(f1_f3_images) # each val is between [-1,1]
 
     # Try to fool the discriminator
-    preds = disc(fake_images)
+    preds = disc(fake_images).reshape(-1) # Size is equal to that of Batch
+    print('preds:',preds)
 
     # Losses:
+
     # Discriminator Loss:
-    targets = torch.ones(Batch_size, 1, device=device)
-    DISC_LOSS = binary_cross_entropy(preds, targets)
+    DISC_LOSS = binary_cross_entropy(preds, torch.ones_like(preds,device=device))
 
     # l1 Loss:
-    L1_LOSS = l1_loss(denorm(fake_images),denorm(real_images))
+    L1_LOSS = l1_loss(fake_images,real_images)
 
     # MS-SSIM Loss:
-    Normalize = transforms.Normalize([1 for _ in range(Channel_img)], [1 for _ in range(Channel_img)])
-    PREDclippedIMG = Normalize(fake_images)
-    MS_SSIM_LOSS = MS_SSIMfunc(real_images,PREDclippedIMG)
+    Normalize = transforms.Normalize([0.5 for _ in range(Channel_img)], [0.5 for _ in range(Channel_img)])
+
+    # MS_SSIM_LOSS = MSSSIM(PREDclippedIMG,real_images)
+    MS_SSIM_LOSS = MSSSIM(fake_images,real_images)
 
     # Clipping Loss:
-    CLIPPING_LOSS = clipping_loss(PREDclippedIMG,fake_images)
+    CLIPPING_LOSS = clipping_loss(MS_SSIMTransform(fake_images),fake_images)
 
     # Update generator weights
     loss = DISC_LOSS + L1_LOSS + MS_SSIM_LOSS + CLIPPING_LOSS
+    print('TotalGEN_LOSS=',loss,'MSSSIM=',MS_SSIM_LOSS,'Clip=',CLIPPING_LOSS)
+    # Clear generator gradients
+    gen.zero_grad()
     loss.backward()
     opt_g.step()
 
@@ -192,8 +186,10 @@ def train(epochs,lr,start_idx=1):
 
         # Log losses & scores (last batch)
         print ("Epoch [{}/{}], loss_g: {:.4f}, loss_d: {:.4f}, real_scores: {:.4f}, fake_scores: {:.4f}".format(epoch+1,epochs,loss_g,loss_d,real_score,fake_score))
+        for i in range(int(len(test_set)*0.2)):
+          showImg(i)  
 
-    return losses_d, losses_d, real_scores, fake_scores
+    return losses_g, losses_d, real_scores, fake_scores
 
 
-train(Num_Epochs,Lr)
+lossG, lossD, RS, FS = train(Num_Epochs,Lr)
