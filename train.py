@@ -193,3 +193,6 @@ def train(epochs,lr,start_idx=1):
 
 
 lossG, lossD, RS, FS = train(Num_Epochs,Lr)
+
+torch.save(gen.state_dict(),'/content/FiNNiGAN-Implementation/logs/Generator.pth')
+torch.save(disc.state_dict(),'/content/FiNNiGAN-Implementation/logs/Discriminator.pth')
