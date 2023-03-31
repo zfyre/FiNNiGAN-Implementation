@@ -158,8 +158,9 @@ class Discriminator(nn.Module):
             nn.MaxPool2d(kernel_size=2,stride=2),
 
             # 1x1
+            # Remove this sigmoid Activation when using the 'WGANFINNI Model'.
             nn.Flatten(),
-            nn.Sigmoid(),
+            nn.Sigmoid(), # This to be removed..
         )
     
     def forward(self,x):

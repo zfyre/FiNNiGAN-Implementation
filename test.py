@@ -24,8 +24,6 @@ Batch_size = 100
 Image_size = 256 # To be taken Care of !!
 Channel_img = 3
 Num_Epochs = 5
-# Features_Disc = 160
-# Features_Gen = 160
 Stats = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5) 
 
 # Appling the Transforms:
@@ -49,7 +47,6 @@ def denorm(img_tensor):
 
 def showImg(idx):
     t1,t2,Img1,Img2 = train_set[idx]
-    # print(torch.min(t1))
     T1 = torch.unsqueeze(t1,dim=0)
     print(t1.shape,t2.shape)
     genout = testModel(T1)
@@ -62,8 +59,6 @@ def showImg(idx):
     axarr[1].imshow(denorm(t2).permute(1,2,0))
     axarr[2].imshow(denorm(genout))
     axarr[3].imshow(denorm(Img2).permute(1,2,0))
-    # axarr[1,0].imshow(t1.permute(1,2,0))
-    # axarr[1,1].imshow(t2.permute(1,2,0))
     f.show()
     plt.show(block=True)
 
