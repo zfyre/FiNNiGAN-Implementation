@@ -3,6 +3,7 @@
 
 * FinniGAN_1.0: https://colab.research.google.com/drive/1gltXtQ7LWMdwInzO29oedGHi3KhsLsCG#scrollTo=I2X5yppsmDpr
 * WFinniGAN: https://colab.research.google.com/drive/1fdgDyCpNM2Zc2Vb9_Rw4udkw3GWyW4eF#scrollTo=--I4qBCGd9hd
+* WFinniGANWithNoise: https://colab.research.google.com/drive/1Tc2KDtUKmm3ATMd9T40sZBsaE-7eTeu8#scrollTo=lbvWb76AwSmY
 
 * How to use:
 
