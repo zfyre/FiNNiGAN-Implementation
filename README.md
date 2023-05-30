@@ -1,9 +1,7 @@
 # Frame interpolation using Convolutional NN and Generative Adversiral Network- Wasserstein Loss
 
-
-* FinniGAN_1.0: https://colab.research.google.com/drive/1gltXtQ7LWMdwInzO29oedGHi3KhsLsCG#scrollTo=I2X5yppsmDpr
-* WFinniGAN: https://colab.research.google.com/drive/1fdgDyCpNM2Zc2Vb9_Rw4udkw3GWyW4eF#scrollTo=--I4qBCGd9hd
-* WFinniGANWithNoise: https://colab.research.google.com/drive/1Tc2KDtUKmm3ATMd9T40sZBsaE-7eTeu8#scrollTo=lbvWb76AwSmY
+* [Google Doc For the Project Report](https://docs.google.com/document/d/1xMbvINbQQ0gAz8x0QupyaHl9f_5DY4zcAgXFaWzq9Dg/edit?usp=sharing)
+* [FinniGAN_1.0](https://colab.research.google.com/drive/1gltXtQ7LWMdwInzO29oedGHi3KhsLsCG#scrollTo=I2X5yppsmDpr), [WFinniGAN](https://colab.research.google.com/drive/1fdgDyCpNM2Zc2Vb9_Rw4udkw3GWyW4eF#scrollTo=--I4qBCGd9hd), [WFinniGANWithNoise](https://colab.research.google.com/drive/1Tc2KDtUKmm3ATMd9T40sZBsaE-7eTeu8#scrollTo=lbvWb76AwSmY)
 
 * How to use:
 
@@ -16,3 +14,6 @@
 * The Pre-Trained model can be used from the ‘logs’ directory, to test on your images:
   * Pass 2 consecutive frame tensors, stacked (each pixel value being the avg of two) upon each other having shape (1,3,256,256), the output you receive will be the middle generated frame.
   * You can also use the showImgTEST() method on a predefine dataset to test the results.
+
+
+
