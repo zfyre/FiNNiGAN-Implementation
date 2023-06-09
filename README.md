@@ -15,5 +15,6 @@
   * Pass 2 consecutive frame tensors, stacked (each pixel value being the avg of two) upon each other having shape (1,3,256,256), the output you receive will be the middle generated frame.
   * You can also use the showImgTEST() method on a predefine dataset to test the results.
 
+* This paper can also be referenced: [FREGAN](https://arxiv.org/ftp/arxiv/papers/2111/2111.01105.pdf)
 
 
